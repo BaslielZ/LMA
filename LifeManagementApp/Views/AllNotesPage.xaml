@@ -1,41 +1,72 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewModels="clr-namespace:LifeManagementApp.ViewModels"
-             x:Class="LifeManagementApp.Views.AllNotesPage"
-             Title="Your Notes"
-             NavigatedTo="ContentPage_NavigatedTo"
-             x:DataType="viewModels:NotesViewModel">
-    <ContentPage.BindingContext>
-        <viewModels:NotesViewModel />
-    </ContentPage.BindingContext>
-    
-    <!-- Add an item to the toolbar -->
+<ContentPage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewModels="clr-namespace:LifeManagementApp.ViewModels"
+    xmlns:models="clr-namespace:LifeManagementApp.Models"
+    x:Class="LifeManagementApp.Views.AllNotesPage"
+    x:DataType="viewModels:NotesViewModel"
+    Title="Your Notes">
+
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Add" Command="{Binding NewCommand}" IconImageSource="{FontImage Glyph='+', Color=Black, Size=22}" />
+        <ToolbarItem Text="Add" 
+                     Command="{Binding NewCommand}" 
+                     IconImageSource="{FontImage Glyph='+', Color=Black, Size=22}" />
     </ContentPage.ToolbarItems>
 
-    <!-- Display notes in a list -->
-    <CollectionView x:Name="notesCollection"
-                        ItemsSource="{Binding AllNotes}"
-                        Margin="20"
-                        SelectionMode="Single"
-                        SelectionChangedCommand="{Binding SelectNoteCommand}"
-                        SelectionChangedCommandParameter="{Binding x:DataType='CollectionView', Source={RelativeSource Self}, Path=SelectedItem}">
+    <!-- Single root content -->
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
 
-        <!-- Designate how the collection of items are laid out -->
-        <CollectionView.ItemsLayout>
-            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
-        </CollectionView.ItemsLayout>
+            <!-- Jokes Section -->
+            <Label Text="Jokes of the Day"
+                   FontSize="20"
+                   FontAttributes="Bold" />
 
-        <!-- Define the appearance of each item in the list -->
-        <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="viewModels:NoteViewModel">
-                <StackLayout>
-                    <Label Text="{Binding Text}" FontSize="22"/>
-                    <Label Text="{Binding Date}" FontSize="14" TextColor="Silver"/>
-                </StackLayout>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
+            <CollectionView ItemsSource="{Binding Jokes}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Joke">
+                        <Frame BackgroundColor="LightGoldenrodYellow"
+                               CornerRadius="10"
+                               Padding="15"
+                               HasShadow="True">
+                        <Label Text="{Binding Content}"
+                               FontSize="16"
+                               Margin="0,5" />
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Notes Section -->
+            <Label Text="Your Notes"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   Margin="0,20,0,0" />
+
+            <CollectionView 
+                x:Name="notesCollection"
+                ItemsSource="{Binding AllNotes}"
+                SelectionMode="Single"
+                SelectionChangedCommand="{Binding SelectNoteCommand}"
+                SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource AncestorType={x:Type CollectionView}}}">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:NoteViewModel">
+                        <StackLayout>
+                            <Label Text="{Binding Text}" FontSize="22"/>
+                            <Label Text="{Binding Date}" FontSize="14" TextColor="Silver"/>
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
 </ContentPage>

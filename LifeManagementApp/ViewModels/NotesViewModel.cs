@@ -1,21 +1,37 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using LifeManagementApp.Interfaces;
 using LifeManagementApp.Models;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace LifeManagementApp.ViewModels;
 
-internal class NotesViewModel : IQueryAttributable
+public class NotesViewModel : IQueryAttributable
 {
     public ObservableCollection<ViewModels.NoteViewModel> AllNotes { get; }
     public ICommand NewCommand { get; }
     public ICommand SelectNoteCommand { get; }
 
-    public NotesViewModel()
+    //Jokes part
+    private readonly IJokeService _jokeService;
+    public ObservableCollection<Joke> Jokes { get; } = new();
+
+
+    public NotesViewModel(IJokeService jokeService)
     {
+        _jokeService = jokeService;
+
         AllNotes = new ObservableCollection<ViewModels.NoteViewModel>(Models.Note.LoadAll().Select(n => new NoteViewModel(n)));
         NewCommand = new AsyncRelayCommand(NewNoteAsync);
         SelectNoteCommand = new AsyncRelayCommand<ViewModels.NoteViewModel>(SelectNoteAsync);
+    }
+
+    public async Task InitializeAsync()
+    {
+        var jokes = await _jokeService.GetJokesAsync();
+        Jokes.Clear();
+        foreach (var joke in jokes)
+            Jokes.Add(joke);
     }
 
     private async Task NewNoteAsync()
