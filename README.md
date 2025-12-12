@@ -2,21 +2,23 @@
 
 ## Features
 
-1. **Dashboard:** for quick actions and viewing  
-2. **To-Do List:** Like a Kanban board with In-Progress and Completed lists. With labels and prioritization.  
-3. **Note Taking:** Quick note-taking tab  
-4. **Weather:** Using open API. Possibly add a forecast and recommend activity based on it.  
-5. **Goals:** A goal can have many tasks to achieve it. Somehow make these tasks linked to the To-Do List for easy drag and drop. And show goal progress based on that.
+1. **NoteTaking:** add, edit, delete notes.
+2. **Daily Jokes:** Get a random joke every time you open the app. (JokeAPI)  
 
 ---
 
 ## File Architecture
 
 **MVVM** — because it is the most common to use when development is feature-based.  
-But still undecided.
+But still kinda undecided.
 
 ---
 
 ## Data Storage
 
-**JSON** (at least for this MVP)
+**Local Database**: For this MVP, all data is stored locally for simplicity
+
+---
+
+##Built With
+**.NET MAUI**
