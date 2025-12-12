@@ -1,5 +1,5 @@
 using LifeManagementApp.ViewModels;
-
+using LifeManagementApp.Models;
 namespace LifeManagementApp.Views;
 
 public partial class AllNotesPage : ContentPage
@@ -30,4 +30,13 @@ public partial class AllNotesPage : ContentPage
         // Reset selection
         notesCollection.SelectedItem = null;
     }
+
+    private async void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is DbNote selected)
+        {
+            await Shell.Current.GoToAsync($"{nameof(NotePage)}?id={selected.Id}");
+        }
+    }
+
 }

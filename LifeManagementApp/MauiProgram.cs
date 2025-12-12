@@ -1,6 +1,7 @@
 ﻿using LifeManagementApp.Interfaces;
 using LifeManagementApp.Services;
 using LifeManagementApp.ViewModels;
+using LifeManagementApp.Data;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
@@ -29,6 +30,14 @@ namespace LifeManagementApp
             builder.Services.AddSingleton<IJokeService, JokeService>();
             builder.Services.AddSingleton<NotesViewModel>();
             builder.Services.AddSingleton<AllNotesPage>();
+
+            builder.Services.AddDbContext<LmaDbContext>();
+
+            builder.Services.AddSingleton<INoteService, NoteService>();
+            builder.Services.AddSingleton<NotesViewModel>();
+            builder.Services.AddSingleton<AllNotesPage>();
+            builder.Services.AddTransient<NoteDetailViewModel>();
+
 #endif
 
             return builder.Build();

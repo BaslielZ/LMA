@@ -19,7 +19,7 @@
         <VerticalStackLayout Padding="20" Spacing="20">
 
             <!-- Jokes Section -->
-            <Label Text="Jokes of the Day"
+            <Label Text="Joke of the Day"
                    FontSize="20"
                    FontAttributes="Bold" />
 
@@ -48,19 +48,27 @@
                 x:Name="notesCollection"
                 ItemsSource="{Binding AllNotes}"
                 SelectionMode="Single"
-                SelectionChangedCommand="{Binding SelectNoteCommand}"
-                SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource AncestorType={x:Type CollectionView}}}">
-
+                SelectionChanged="OnSelectionChanged">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
                 </CollectionView.ItemsLayout>
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="viewModels:NoteViewModel">
-                        <StackLayout>
-                            <Label Text="{Binding Text}" FontSize="22"/>
-                            <Label Text="{Binding Date}" FontSize="14" TextColor="Silver"/>
+                    <DataTemplate x:DataType="models:DbNote">
+                        <StackLayout Padding="15">
+                            <Label Text="{Binding Title}" 
+                                   FontSize="21" 
+                                   TextColor="Black"/>
+
+                            <Label Text="{Binding Text}" 
+                                   FontSize="17" 
+                                   TextColor="Gray"/>
+
+                            <Label Text="{Binding CreatedAt, StringFormat='Created: {0:yyyy-MM-dd HH:mm}'}" 
+                                   FontSize="13"
+                                   TextColor="HotPink"/>
                         </StackLayout>
+
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
 

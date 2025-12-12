@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using LifeManagementApp.Interfaces;
 using LifeManagementApp.Models;
+using LifeManagementApp.Services;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -8,30 +9,41 @@ namespace LifeManagementApp.ViewModels;
 
 public class NotesViewModel : IQueryAttributable
 {
-    public ObservableCollection<ViewModels.NoteViewModel> AllNotes { get; }
+    private readonly INoteService _noteService;
+    private readonly IJokeService _jokeService;
+
+    public ObservableCollection<DbNote> AllNotes { get; } = new();
     public ICommand NewCommand { get; }
     public ICommand SelectNoteCommand { get; }
 
-    //Jokes part
-    private readonly IJokeService _jokeService;
+    // Jokes part
     public ObservableCollection<Joke> Jokes { get; } = new();
 
-
-    public NotesViewModel(IJokeService jokeService)
+    public NotesViewModel(INoteService noteService, IJokeService jokeService)
     {
+        _noteService = noteService;
         _jokeService = jokeService;
 
-        AllNotes = new ObservableCollection<ViewModels.NoteViewModel>(Models.Note.LoadAll().Select(n => new NoteViewModel(n)));
         NewCommand = new AsyncRelayCommand(NewNoteAsync);
-        SelectNoteCommand = new AsyncRelayCommand<ViewModels.NoteViewModel>(SelectNoteAsync);
+        SelectNoteCommand = new AsyncRelayCommand<int>(SelectNoteAsync);
     }
 
     public async Task InitializeAsync()
     {
+        await LoadNotesAsync();
+
         var jokes = await _jokeService.GetJokesAsync();
         Jokes.Clear();
         foreach (var joke in jokes)
             Jokes.Add(joke);
+    }
+
+    public async Task LoadNotesAsync()
+    {
+        var notes = await _noteService.GetAllNotesAsync();
+        AllNotes.Clear();
+        foreach (var note in notes)
+            AllNotes.Add(note);
     }
 
     private async Task NewNoteAsync()
@@ -39,38 +51,41 @@ public class NotesViewModel : IQueryAttributable
         await Shell.Current.GoToAsync(nameof(Views.NotePage));
     }
 
-    private async Task SelectNoteAsync(ViewModels.NoteViewModel note)
+    private async Task SelectNoteAsync(int id)
     {
-        if (note != null)
-            await Shell.Current.GoToAsync($"{nameof(Views.NotePage)}?load={note.Identifier}");
+        if (id != null)
+            await Shell.Current.GoToAsync($"{nameof(Views.NotePage)}?id={id}");
     }
 
     void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.ContainsKey("deleted"))
         {
-            string noteId = query["deleted"].ToString();
-            NoteViewModel matchedNote = AllNotes.Where((n) => n.Identifier == noteId).FirstOrDefault();
-
-            // If note exists, delete it
+            int noteId = int.Parse(query["deleted"].ToString());
+            var matchedNote = AllNotes.FirstOrDefault(n => n.Id == noteId);
             if (matchedNote != null)
                 AllNotes.Remove(matchedNote);
         }
         else if (query.ContainsKey("saved"))
         {
-            string noteId = query["saved"].ToString();
-            NoteViewModel matchedNote = AllNotes.Where((n) => n.Identifier == noteId).FirstOrDefault();
+            int noteId = int.Parse(query["saved"].ToString());
+            var matchedNote = AllNotes.FirstOrDefault(n => n.Id == noteId);
 
-            // If note is found, update it
             if (matchedNote != null)
             {
-                matchedNote.Reload();
-                AllNotes.Move(AllNotes.IndexOf(matchedNote), 0);
+                // Reload note from database
+                var reloaded = _noteService.GetNoteByIdAsync(noteId).Result;
+                int index = AllNotes.IndexOf(matchedNote);
+                if (reloaded != null)
+                    AllNotes[index] = reloaded;
             }
-
-            // If note isn't found, it's new; add it.
             else
-                AllNotes.Insert(0, new NoteViewModel(Note.Load(noteId)));
+            {
+                // New note, fetch and insert at z top
+                var newNote = _noteService.GetNoteByIdAsync(noteId).Result;
+                if (newNote != null)
+                    AllNotes.Insert(0, newNote);
+            }
         }
     }
 }
